@@ -85,7 +85,7 @@ config.groups.forEach( function(group) {
 			var item_file_id = item_id.replace(":","_")
 			var item_func_file = Path.join( func_dir, "sort_" + item_file_id + ".mcfunction" );
 			fs.writeFileSync( item_func_file, 
-				'execute as @s if entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + '] run teleport @s @e[limit=1,sort=random,type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + ']' + "\n" +
+				'execute as @s if entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + '] run teleport @s @e[limit=1,sort=random,type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + ']' + "\n" +
 				'execute as @s unless entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + '] run function mss:sort_' + group_id + "\n"
 			);
 			console.log("Wrote item file: " + Path.relative(__dirname, item_func_file));
