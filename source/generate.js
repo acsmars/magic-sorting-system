@@ -65,13 +65,13 @@ config.groups.forEach( function(group) {
 	if (items && items.length && target) {
 		var group_func_file = Path.join( func_dir, "sort_" + group_id + ".mcfunction" );
 		var fallback_action = group.fallback ? ('function mss:sort_' + group.fallback) : config.final_fallback;
-		
+
 		// create special sort mcfunction for group
 		fs.writeFileSync( group_func_file, 
-			'execute as @s if entity @e[type=minecraft:item_frame,nbt={Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + '] run teleport @s @e[limit=1,sort=random,type=minecraft:item_frame,nbt={Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + ']' + "\n" +
-			'execute as @s unless entity @e[type=minecraft:item_frame,nbt={Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + '] run ' + fallback_action + "\n"
+			'execute as @s if entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + '] run teleport @s @e[limit=1,sort=random,type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + ']' + "\n" +
+			'execute as @s unless entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + '] run ' + fallback_action + "\n"
 		);
-		console.log("Wrote file: " + Path.relative(__dirname, group_func_file));
+		console.log("Wrote group file: " + Path.relative(__dirname, group_func_file));
 		
 		// add group's items to main sort routine
 		items.forEach( function(item_id, idx) {
@@ -80,9 +80,18 @@ config.groups.forEach( function(group) {
 				console.error("ERROR: Duplicate Item ID: " + item_id);
 			}
 			all_item_ids[item_id] = 1;
-			
+
+			// Create a special group to sort specifically this item that falls back to the group
+			var item_file_id = item_id.replace(":","_")
+			var item_func_file = Path.join( func_dir, "sort_" + item_file_id + ".mcfunction" );
+			fs.writeFileSync( item_func_file, 
+				'execute as @s if entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + '] run teleport @s @e[limit=1,sort=random,type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + target + '"}},distance=0..' + config.max_teleport_distance + ']' + "\n" +
+				'execute as @s unless entity @e[type=minecraft:item_frame,nbt={ItemRotation: 4b, Item:{id:"' + item_id + '"}},distance=0..' + config.max_teleport_distance + '] run function mss:sort_' + group_id + "\n"
+			);
+			console.log("Wrote item file: " + Path.relative(__dirname, item_func_file));
+
 			sort_lines.push(
-				'execute as @s if entity @s[type=item,nbt={Item:{id:"' + item_id + '"}}] run function mss:sort_' + group_id
+				'execute as @s if entity @s[type=item,nbt={Item:{id:"' + item_id + '"}}] run function mss:sort_' + item_file_id
 			);
 			total_items++;
 		} );
